@@ -27,11 +27,13 @@ wss.on('connection', ws => {
 
     const handlePresenceUpdate = (oldPresence, newPresence) => {
         const spotifyActivity = newPresence.activities.find(activity => activity.name === 'Spotify');
+        const vsCodeActivity = newPresence.activities.find(activity => activity.name === 'Visual Studio Code');
+        
         if (spotifyActivity) {
             ws.send(JSON.stringify({
                 username: newPresence.user.tag,
                 status: newPresence.status,
-                activity: spotifyActivity.name,
+                activity: 'Spotify',
                 image: spotifyActivity.assets.largeImageURL(),
                 songUrl: `https://open.spotify.com/track/${spotifyActivity.syncId}`,
                 songName: spotifyActivity.details,
@@ -40,8 +42,19 @@ wss.on('connection', ws => {
                 endTime: spotifyActivity.timestamps.end,
                 elapsed: Date.now() - spotifyActivity.timestamps.start
             }));
+        } else if (vsCodeActivity) {
+            ws.send(JSON.stringify({
+                username: newPresence.user.tag,
+                status: newPresence.status,
+                activity: 'Visual Studio Code',
+                image: vsCodeActivity.assets.largeImageURL(),
+                project: vsCodeActivity.details,
+                fileName: vsCodeActivity.state,
+                startTime: vsCodeActivity.timestamps.start,
+                elapsed: Date.now() - vsCodeActivity.timestamps.start
+            }));
         } else {
-            // Send offline status if not playing Spotify
+            // Send offline status if not playing Spotify or using VS Code
             ws.send(JSON.stringify({
                 username: newPresence.user.tag,
                 status: 'offline',
@@ -50,6 +63,8 @@ wss.on('connection', ws => {
                 songUrl: null,
                 songName: null,
                 artistName: null,
+                project: null,
+                fileName: null,
                 startTime: null,
                 endTime: null,
                 elapsed: null
