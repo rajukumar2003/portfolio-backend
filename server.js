@@ -54,7 +54,6 @@ wss.on('connection', ws => {
                 elapsed: Date.now() - vsCodeActivity.timestamps.start
             }));
         } else {
-            // Send offline status if not playing Spotify or using VS Code
             ws.send(JSON.stringify({
                 username: newPresence.user.tag,
                 status: 'offline',
@@ -72,13 +71,12 @@ wss.on('connection', ws => {
         }
     };
 
-    // Remove existing listeners to prevent duplication
     client.off('presenceUpdate', handlePresenceUpdate);
     client.on('presenceUpdate', handlePresenceUpdate);
 
     ws.on('close', () => {
         console.log('Client disconnected');
-        client.off('presenceUpdate', handlePresenceUpdate); // Clean up listener
+        client.off('presenceUpdate', handlePresenceUpdate); 
     });
 });
 
